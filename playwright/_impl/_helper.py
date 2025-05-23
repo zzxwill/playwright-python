@@ -530,14 +530,15 @@ def transform_cdp_url(url: str) -> str:
         url: The original CDP endpoint URL
 
     Returns:
-        The transformed URL with /json/version path and query parameters in the correct order
+        The transformed URL with /json/version path (if not already present) and query parameters in the correct order
     """
     parsed = urlparse(url)
     # Keep the original path without trailing slash
     base_path = parsed.path.rstrip('/')
-    # Create the full path including /json/version
-    full_path = f"{base_path}/json/version"
+    # Only append /json/version if it's not already in the path
+    if not base_path.endswith('/json/version') and not '/json/version/' in base_path:
+        base_path = f"{base_path}/json/version"
     # Keep any existing query parameters
     query = f"?{parsed.query}" if parsed.query else ""
     # Reconstruct the URL with the proper order of components
-    return f"{parsed.scheme}://{parsed.netloc}{full_path}{query}"
+    return f"{parsed.scheme}://{parsed.netloc}{base_path}{query}"
