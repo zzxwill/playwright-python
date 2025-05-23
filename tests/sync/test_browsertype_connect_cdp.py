@@ -33,3 +33,17 @@ def test_connect_to_an_existing_cdp_session(
     assert len(cdp_browser.contexts) == 1
     cdp_browser.close()
     browser_server.close()
+
+
+def test_connect_over_cdp_http_with_query_params(
+    launch_arguments: Dict, browser_type: BrowserType
+) -> None:
+    port = find_free_port()
+    browser_server = browser_type.launch(
+        **launch_arguments, args=[f"--remote-debugging-port={port}"]
+    )
+    endpoint_url = f"http://127.0.0.1:{port}/?param=test"
+    cdp_browser = browser_type.connect_over_cdp(endpoint_url)
+    assert len(cdp_browser.contexts) == 1
+    cdp_browser.close()
+    browser_server.close()

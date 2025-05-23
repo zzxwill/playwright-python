@@ -115,3 +115,42 @@ async def test_should_print_custom_ws_close_error(
         await browser_type.connect_over_cdp(
             f"ws://127.0.0.1:{server.PORT}/ws", headers={"foo": "bar"}
         )
+
+
+async def test_connect_over_cdp_http_with_query_params(
+    launch_arguments: Dict, browser_type: BrowserType, server: Server
+) -> None:
+    port = find_free_port()
+    browser_server = await browser_type.launch(
+        **launch_arguments, args=[f"--remote-debugging-port={port}"]
+    )
+
+    # Test query param at the end of path
+    endpoint_url = f"http://127.0.0.1:{port}?q1=test"
+    cdp_browser1 = await browser_type.connect_over_cdp(endpoint_url)
+    assert len(cdp_browser1.contexts) == 1
+    await cdp_browser1.close()
+
+    # Test query param with leading slash
+    endpoint_url = f"http://127.0.0.1:{port}/?q1=test"
+    cdp_browser2 = await browser_type.connect_over_cdp(endpoint_url)
+    assert len(cdp_browser2.contexts) == 1
+    await cdp_browser2.close()
+
+    await browser_server.close()
+
+
+async def test_connect_over_cdp_ws_with_query_params(
+    launch_arguments: Dict, browser_type: BrowserType, server: Server
+) -> None:
+    port = find_free_port()
+    browser_server = await browser_type.launch(
+        **launch_arguments, args=[f"--remote-debugging-port={port}"]
+    )
+    http_url = f"http://127.0.0.1:{port}/?q1=test"
+    ws_endpoint = _ws_endpoint_from_url(http_url)
+
+    cdp_browser = await browser_type.connect_over_cdp(ws_endpoint)
+    assert len(cdp_browser.contexts) == 1
+    await cdp_browser.close()
+    await browser_server.close()

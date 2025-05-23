@@ -521,3 +521,23 @@ TEXTUAL_MIME_TYPE = re.compile(
 
 def is_textual_mime_type(mime_type: str) -> bool:
     return bool(TEXTUAL_MIME_TYPE.match(mime_type))
+
+
+def transform_cdp_url(url: str) -> str:
+    """Transform a CDP URL by properly handling the path and query parameters.
+
+    Args:
+        url: The original CDP endpoint URL
+
+    Returns:
+        The transformed URL with /json/version path and query parameters in the correct order
+    """
+    parsed = urlparse(url)
+    # Keep the original path without trailing slash
+    base_path = parsed.path.rstrip('/')
+    # Create the full path including /json/version
+    full_path = f"{base_path}/json/version"
+    # Keep any existing query parameters
+    query = f"?{parsed.query}" if parsed.query else ""
+    # Reconstruct the URL with the proper order of components
+    return f"{parsed.scheme}://{parsed.netloc}{full_path}{query}"

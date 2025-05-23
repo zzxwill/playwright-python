@@ -182,6 +182,9 @@ class BrowserType(ChannelOwner):
         slowMo: float = None,
         headers: Dict[str, str] = None,
     ) -> Browser:
+        from playwright._impl._helper import transform_cdp_url
+        # Transform the endpoint URL to properly handle paths and query parameters
+        endpointURL = transform_cdp_url(endpointURL)
         params = locals_to_params(locals())
         if params.get("headers"):
             params["headers"] = serialize_headers(params["headers"])
